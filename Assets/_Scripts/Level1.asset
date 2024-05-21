@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level1
   m_EditorClassIdentifier: 
   platformAmount: 5
-  startingPlatformPrefab: {fileID: 8837096321041449070, guid: 001ea89d5624d4344aec6ff37aa48c87,
+  startingPlatformPrefab: {fileID: 5801653023602548761, guid: 60fac5c5e15568943a86d615695e9456,
     type: 3}
-  platformPrefab: {fileID: 8837096321041449070, guid: ace88e11471c7d74aa32d8932def778f,
+  platformPrefab: {fileID: 6920423408008112963, guid: e314767d980318b418e8a022013b29f9,
     type: 3}

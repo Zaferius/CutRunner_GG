@@ -74,6 +74,17 @@ public class GameManager : MonoBehaviour
 
     private void StopPlatform()
     {
+        CalculatePlacePos();
+
+        activePlatform.StopPlatform();
+        
+        if(index == movingPlatforms.Count - 1) return;
+        index++;
+        ActivateNextPlatform();
+    }
+
+    private void CalculatePlacePos()
+    {
         float diff;
         if (index > 0)
         {
@@ -96,7 +107,7 @@ public class GameManager : MonoBehaviour
         if (diff <= placeTolerance)
         {
             print("PERFECT!");
-            activePlatform.GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
+            activePlatform.transform.GetChild(0).GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
 
             if (index == 0)
             {
@@ -109,12 +120,10 @@ public class GameManager : MonoBehaviour
                     .SetEase(Ease.OutBack);
             }
         }
-        
-        activePlatform.StopPlatform();
-        
-        if(index == movingPlatforms.Count - 1) return;
-        index++;
-        ActivateNextPlatform();
+        else if (diff >= placeTolerance + 0.1f)
+        {
+            activePlatform.transform.GetChild(0).GetComponent<MeshRenderer>().material.DOColor(Color.yellow, 0.1f);
+        }
     }
     
 }
