@@ -41,6 +41,8 @@ public class CameraController : MonoBehaviour
         {
             RotateWinCam();
         }
+        
+        
     }
 
     private void WinCam()
@@ -66,7 +68,7 @@ public class CameraController : MonoBehaviour
         float initialDuration = shakeDuration;
         
         noise.m_AmplitudeGain = shakeIntensity;
-        noise.m_FrequencyGain = 10f;
+        noise.m_FrequencyGain = 1f;
         
         float decreaseFactor = 1.0f / shakeDuration;
         
@@ -78,7 +80,7 @@ public class CameraController : MonoBehaviour
     {
         CinemachineBasicMultiChannelPerlin noise = playCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
         
-        shakeIntensity -= Time.deltaTime;
+        shakeIntensity -= Time.deltaTime * 5;
         noise.m_AmplitudeGain = shakeIntensity;
         
         if (shakeIntensity <= 0)
@@ -90,6 +92,6 @@ public class CameraController : MonoBehaviour
 
     private void PerfectShake()
     {
-        ShakeCamera(1f, 1.5f);
+        ShakeCamera(3f, 0.1f);
     }
 }

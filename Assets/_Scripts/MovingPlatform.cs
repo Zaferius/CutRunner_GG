@@ -74,5 +74,6 @@ public class MovingPlatform : MonoBehaviour
     public void StopPlatform()
     {
         isMoving = false;
+        GetComponent<MeshRenderer>().material.DOColor(ColorManager.i.NextColor(), 0.2f);
     }
 }

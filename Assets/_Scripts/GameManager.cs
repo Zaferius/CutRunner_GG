@@ -24,12 +24,13 @@ public class GameManager : MonoBehaviour
     public List<MovingPlatform> placedPlatforms = new List<MovingPlatform>();
     public MovingPlatform activePlatform;
     private Transform _previousPlatform;
-    [SerializeField] private int placedPlatformIndex;
+    private int placedPlatformIndex;
 
     [Space(5)] 
-    private float _currentZ;
+    private float _currentZPos;
     public GameObject playPlatform;
-    [Space(5)]
+    [Space(5)] 
+    public int perfectTapCombo;
     [Range(0f, 1f)]
     public float placeTolerance;
     
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = 120;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         placedPlatformIndex = -1;
-        _currentZ = 4;
+        _currentZPos = 4;
     }
 
     public void StartGame()
@@ -85,8 +86,8 @@ public class GameManager : MonoBehaviour
     private void SpawnPlatform()
     {
         placedPlatformIndex++;
-        _currentZ += 2;
-        var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZ), Quaternion.identity);
+        _currentZPos += 2;
+        var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZPos), Quaternion.identity);
         var platformSc = platformObj.GetComponent<MovingPlatform>();
         placedPlatforms.Add(platformSc);
         platformSc.StartPlatform();
@@ -115,7 +116,10 @@ public class GameManager : MonoBehaviour
         if (diff <= placeTolerance)
         {
             Actions.OnPerfectTap();
-            activePlatform.GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
+            perfectTapCombo++;
+
+            Instantiate(ParticleManager.i.starExplosion, activePlatform.transform.position, Quaternion.identity);
+            SoundManager.instance.PlaySoundPerfectTap(SoundManager.instance.perfectTap);
 
             if (placedPlatformIndex == 0)
             {
@@ -130,7 +134,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            
+            perfectTapCombo = 0;
             float xOffset = activePlatform.transform.localPosition.x - _previousPlatform.transform.localPosition.x;
             CutAndDestroy(activePlatform.gameObject, xOffset);
         }
@@ -184,10 +188,31 @@ public class GameManager : MonoBehaviour
     }
     
     GameObject cutPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    
+    cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.white,0).OnComplete(() =>
+    {
+        cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.gray, 0.6f);
+    });
+    
+    cutPart.layer = 7;
     cutPart.transform.localScale = cutScale;
     cutPart.transform.position = cutPosition;
     cutPart.AddComponent<Rigidbody>();
-    cutPart.GetComponent<Rigidbody>().AddTorque(new Vector3(Random.Range(-300,300),Random.Range(-300,300),Random.Range(-300,300)));
+    var cutPartRb = cutPart.GetComponent<Rigidbody>();
+    cutPartRb.AddTorque(new Vector3(Random.Range(-50,50),Random.Range(-75,75),Random.Range(-5,5)));
+
+    var dir = 1;
+    if (xOffset > 0)
+    {
+        dir = 1;
+    }
+    else
+    {
+        dir = -1;
+    }
+    
+    cutPartRb.AddForce(platform.transform.right * (dir * 100), ForceMode.Force);
+    
     Destroy(cutPart, 3f);
 }
     
