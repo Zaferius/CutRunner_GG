@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     {
         Application.targetFrameRate = 120;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        index = -1;
     }
     
     public void StartGame()
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
     {
         if (gameState != GameState.Play) return;
 
-        if (index == 0 && player.transform.localPosition.z > 0.1f)
+        if (index == -1 && player.transform.localPosition.z > 0.1f)
         {
             ActivateNextPlatform();
         }
@@ -68,8 +69,18 @@ public class GameManager : MonoBehaviour
 
     private void ActivateNextPlatform()
     {
-        activePlatform = movingPlatforms[index];
-        activePlatform.StartPlatform();
+
+        if (index < movingPlatforms.Count - 1)
+        {
+            index++;
+            activePlatform = movingPlatforms[index];
+            activePlatform.StartPlatform();
+        }
+        else
+        {
+            
+        }
+        
     }
 
     private void StopPlatform()
@@ -77,9 +88,7 @@ public class GameManager : MonoBehaviour
         CalculatePlacePos();
 
         activePlatform.StopPlatform();
-        
-        if(index == movingPlatforms.Count - 1) return;
-        index++;
+
         ActivateNextPlatform();
     }
 
@@ -106,12 +115,13 @@ public class GameManager : MonoBehaviour
         
         if (diff <= placeTolerance)
         {
+            /*Actions.OnPerfectTap();*/
             print("PERFECT!");
             activePlatform.transform.GetChild(0).GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
 
             if (index == 0)
             {
-                activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 8.5f), 0.1f)
+                activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 6f), 0.1f)
                     .SetEase(Ease.OutBack);
             }
             else
@@ -119,10 +129,6 @@ public class GameManager : MonoBehaviour
                 activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 2), 0.1f)
                     .SetEase(Ease.OutBack);
             }
-        }
-        else if (diff >= placeTolerance + 0.1f)
-        {
-            activePlatform.transform.GetChild(0).GetComponent<MeshRenderer>().material.DOColor(Color.yellow, 0.1f);
         }
     }
     

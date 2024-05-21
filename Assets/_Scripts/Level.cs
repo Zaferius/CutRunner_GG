@@ -11,7 +11,7 @@ public class Level : MonoBehaviour
 
     private void BuildLevel()
     {
-        var startPosition = new Vector3(0,0,8.5f);
+        var startPosition = new Vector3(0,0,6f);
 
         var startingPlatform = Instantiate(lvlScriptable.startingPlatformPrefab, Vector3.zero, Quaternion.identity);
         startingPlatform.transform.parent = transform;
@@ -25,6 +25,9 @@ public class Level : MonoBehaviour
             platform.transform.parent = transform;
             GameManager.i.movingPlatforms.Add(platform.GetComponent<MovingPlatform>());
         }
+        
+        var finishPlatform = Instantiate(lvlScriptable.finishPlatformPrefab, new Vector3(0,0,GameManager.i.movingPlatforms[^1].transform.localPosition.z + 6), Quaternion.identity);
+        finishPlatform.transform.parent = transform;
     }
 }
 

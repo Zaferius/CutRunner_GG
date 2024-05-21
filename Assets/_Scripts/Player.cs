@@ -13,11 +13,13 @@ public class Player : MonoBehaviour
     private void OnEnable()
     {
         Actions.OnStartGame += Go;
+        Actions.OnGameWin += PlayerGameWin;
     }
 
     private void OnDisable()
     {
         Actions.OnStartGame -= Go;
+        Actions.OnGameWin -= PlayerGameWin;
     }
     
     void Start()
@@ -28,7 +30,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (_canGo)
+        if (_canGo && GameManager.i.gameState == GameManager.GameState.Play)
         {
             transform.Translate(transform.forward * (Time.deltaTime * testSpeed));
         }
@@ -38,5 +40,12 @@ public class Player : MonoBehaviour
     {
         _canGo = true;
         animator.SetTrigger("run");
+    }
+
+    private void PlayerGameWin()
+    {
+        rb.useGravity = false;
+        animator.SetTrigger("dance");
+        _canGo = false;
     }
 }
