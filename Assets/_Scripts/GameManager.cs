@@ -6,19 +6,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager i;
-    
-    private void InstanceMethod()
-    {
-        if (i)
-        {
-            Destroy(this);
-        }
-        else
-        {
-            i = this;
-        }
-    }
-    
+
     public enum GameState
     {
         Play,
@@ -29,14 +17,23 @@ public class GameManager : MonoBehaviour
     }
     public GameState gameState;
 
+    private Player player;
+    
     private void Awake()
     {
-        InstanceMethod();
+        if (i)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            i = this;
+        }
     }
 
-    void Start()
+    private void Start()
     {
-        
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
     }
     
     void Update()
@@ -46,6 +43,6 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        
+        Actions.OnStartGame();
     }
 }
