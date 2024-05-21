@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -18,6 +19,14 @@ public class GameManager : MonoBehaviour
     public GameState gameState;
 
     private Player player;
+    public List<MovingPlatform> movingPlatforms = new List<MovingPlatform>();
+    public MovingPlatform activePlatform;
+    private Transform _previousPlatform;
+    [SerializeField] private int index;
+
+    [Space(5)]
+    [Range(0f, 1f)]
+    public float placeTolerance;
     
     private void Awake()
     {
@@ -33,16 +42,79 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        Application.targetFrameRate = 120;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
     }
     
-    void Update()
-    {
-        
-    }
-
     public void StartGame()
     {
         Actions.OnStartGame();
     }
+    
+    void Update()
+    {
+        if (gameState != GameState.Play) return;
+
+        if (index == 0 && player.transform.localPosition.z > 0.1f)
+        {
+            ActivateNextPlatform();
+        }
+
+        if (Input.GetMouseButtonDown(0) && activePlatform)
+        {
+           StopPlatform();
+        }
+    }
+
+    private void ActivateNextPlatform()
+    {
+        activePlatform = movingPlatforms[index];
+        activePlatform.StartPlatform();
+    }
+
+    private void StopPlatform()
+    {
+        float diff;
+        if (index > 0)
+        {
+            _previousPlatform = movingPlatforms[index - 1].transform;
+            diff = _previousPlatform.localPosition.x - activePlatform.transform.localPosition.x;
+        }
+        else
+        {
+            _previousPlatform = GameObject.FindWithTag("StartingPlatform").transform;
+            diff = activePlatform.transform.localPosition.x - 0;
+        }
+
+        if (diff < 0)
+        {
+            diff *= -1;
+        }
+        
+        print("Diff is : " + " " + diff);
+        
+        if (diff <= placeTolerance)
+        {
+            print("PERFECT!");
+            activePlatform.GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
+
+            if (index == 0)
+            {
+                activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 8.5f), 0.1f)
+                    .SetEase(Ease.OutBack);
+            }
+            else
+            {
+                activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 2), 0.1f)
+                    .SetEase(Ease.OutBack);
+            }
+        }
+        
+        activePlatform.StopPlatform();
+        
+        if(index == movingPlatforms.Count - 1) return;
+        index++;
+        ActivateNextPlatform();
+    }
+    
 }

@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     private Animator animator;
     private Rigidbody rb;
     private bool _canGo;
+    public float testSpeed;
     
     private void OnEnable()
     {
@@ -29,7 +30,7 @@ public class Player : MonoBehaviour
     {
         if (_canGo)
         {
-            rb.AddForce(transform.forward * 50, ForceMode.Force);
+            transform.Translate(transform.forward * (Time.deltaTime * testSpeed));
         }
     }
 
