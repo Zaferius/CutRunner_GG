@@ -68,6 +68,7 @@ public class MovingPlatform : MonoBehaviour
     {
         isMoving = true;
         transform.DOScale(_defaultScale, 0.15f).SetEase(Ease.OutBack);
+        GameManager.i.activePlatform = this;
     }
 
     public void StopPlatform()

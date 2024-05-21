@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,11 +21,14 @@ public class GameManager : MonoBehaviour
     public GameState gameState;
 
     private Player player;
-    public List<MovingPlatform> movingPlatforms = new List<MovingPlatform>();
+    public List<MovingPlatform> placedPlatforms = new List<MovingPlatform>();
     public MovingPlatform activePlatform;
     private Transform _previousPlatform;
-    [SerializeField] private int index;
+    [SerializeField] private int placedPlatformIndex;
 
+    [Space(5)] 
+    private float _currentZ;
+    public GameObject playPlatform;
     [Space(5)]
     [Range(0f, 1f)]
     public float placeTolerance;
@@ -44,9 +49,10 @@ public class GameManager : MonoBehaviour
     {
         Application.targetFrameRate = 120;
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-        index = -1;
+        placedPlatformIndex = -1;
+        _currentZ = 4;
     }
-    
+
     public void StartGame()
     {
         Actions.OnStartGame();
@@ -56,9 +62,9 @@ public class GameManager : MonoBehaviour
     {
         if (gameState != GameState.Play) return;
 
-        if (index == -1 && player.transform.localPosition.z > 0.1f)
+        if (placedPlatformIndex == -1 && player.transform.localPosition.z > 0.1f)
         {
-            ActivateNextPlatform();
+            SpawnPlatform();
         }
 
         if (Input.GetMouseButtonDown(0) && activePlatform)
@@ -67,42 +73,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void ActivateNextPlatform()
-    {
-
-        if (index < movingPlatforms.Count - 1)
-        {
-            index++;
-            activePlatform = movingPlatforms[index];
-            activePlatform.StartPlatform();
-        }
-        else
-        {
-            
-        }
-        
-    }
-
     private void StopPlatform()
     {
         CalculatePlacePos();
 
         activePlatform.StopPlatform();
 
-        ActivateNextPlatform();
+        SpawnPlatform();
+    }
+
+    private void SpawnPlatform()
+    {
+        placedPlatformIndex++;
+        _currentZ += 2;
+        var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZ), Quaternion.identity);
+        var platformSc = platformObj.GetComponent<MovingPlatform>();
+        placedPlatforms.Add(platformSc);
+        platformSc.StartPlatform();
+      
     }
 
     private void CalculatePlacePos()
     {
         float diff;
-        if (index > 0)
+        if (placedPlatformIndex > 0)
         {
-            _previousPlatform = movingPlatforms[index - 1].transform;
+            _previousPlatform = placedPlatforms[placedPlatformIndex - 1].transform;
             diff = _previousPlatform.localPosition.x - activePlatform.transform.localPosition.x;
         }
         else
         {
-            _previousPlatform = GameObject.FindWithTag("StartingPlatform").transform;
+            _previousPlatform = GameObject.FindGameObjectWithTag("StartingPlatform").transform;
             diff = activePlatform.transform.localPosition.x - 0;
         }
 
@@ -110,16 +111,13 @@ public class GameManager : MonoBehaviour
         {
             diff *= -1;
         }
-        
-        print("Diff is : " + " " + diff);
-        
+
         if (diff <= placeTolerance)
         {
-            /*Actions.OnPerfectTap();*/
-            print("PERFECT!");
-            activePlatform.transform.GetChild(0).GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
+            Actions.OnPerfectTap();
+            activePlatform.GetComponent<MeshRenderer>().material.DOColor(Color.green, 0.1f);
 
-            if (index == 0)
+            if (placedPlatformIndex == 0)
             {
                 activePlatform.transform.DOLocalMove(_previousPlatform.localPosition + new Vector3(0, 0, 6f), 0.1f)
                     .SetEase(Ease.OutBack);
@@ -130,6 +128,67 @@ public class GameManager : MonoBehaviour
                     .SetEase(Ease.OutBack);
             }
         }
+        else
+        {
+            
+            float xOffset = activePlatform.transform.localPosition.x - _previousPlatform.transform.localPosition.x;
+            CutAndDestroy(activePlatform.gameObject, xOffset);
+        }
     }
+    
+ void CutAndDestroy(GameObject platform, float xOffset)
+{
+    float platformWidth = platform.transform.localScale.x;
+    float newWidth = platformWidth - Mathf.Abs(xOffset);
+    
+    if (newWidth <= 0)
+    {
+        Destroy(platform);
+        return;
+    }
+    
+    Vector3 initialScale = platform.transform.localScale;
+    Vector3 initialPosition = platform.transform.position;
+
+    Vector3 newScale = new Vector3(newWidth, initialScale.y, initialScale.z);
+    float halfInitialWidth = initialScale.x / 2f;
+    float halfNewWidth = newScale.x / 2f;
+
+    Vector3 newPosition;
+
+   
+    if (xOffset > 0)
+    {
+        newPosition = initialPosition + new Vector3(-halfInitialWidth + halfNewWidth, 0, 0);
+    }
+    else
+    {
+        newPosition = initialPosition + new Vector3(halfInitialWidth - halfNewWidth, 0, 0);
+    }
+    
+    platform.transform.localScale = newScale;
+    platform.transform.position = newPosition;
+    playPlatform = platform;
+    
+    float cutWidth = Mathf.Abs(xOffset);
+    Vector3 cutScale = new Vector3(cutWidth, initialScale.y, initialScale.z);
+    Vector3 cutPosition;
+    
+    if (xOffset > 0)
+    {
+        cutPosition = initialPosition + new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
+    }
+    else
+    {
+        cutPosition = initialPosition - new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
+    }
+    
+    GameObject cutPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    cutPart.transform.localScale = cutScale;
+    cutPart.transform.position = cutPosition;
+    cutPart.AddComponent<Rigidbody>();
+    cutPart.GetComponent<Rigidbody>().AddTorque(new Vector3(Random.Range(-300,300),Random.Range(-300,300),Random.Range(-300,300)));
+    Destroy(cutPart, 3f);
+}
     
 }

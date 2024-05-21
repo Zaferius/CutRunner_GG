@@ -10,6 +10,9 @@ public class CameraController : MonoBehaviour
     [Space(5)]
     public CinemachineFreeLook winCam;
     public float winCamRotationSpeed;
+    [Header("Shake")]
+     public float shakeIntensity = 1.2f;
+     public float shakeDuration = 0.3f;
 
     private void Awake()
     {
@@ -23,11 +26,13 @@ public class CameraController : MonoBehaviour
     private void OnEnable()
     {
         Actions.OnGameWin += WinCam;
+        Actions.OnPerfectTap += PerfectShake;
     }
 
     private void OnDisable()
     {
         Actions.OnGameWin -= WinCam;
+        Actions.OnPerfectTap -= PerfectShake;
     }
 
     private void Update()
@@ -47,5 +52,44 @@ public class CameraController : MonoBehaviour
     private void RotateWinCam()
     {
         winCam.m_XAxis.Value += winCamRotationSpeed * Time.deltaTime;
+    }
+   
+    
+    public void ShakeCamera(float intensity, float duration)
+    {
+        shakeIntensity = intensity;
+        shakeDuration = duration;
+        
+        CinemachineBasicMultiChannelPerlin noise = playCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+
+        float initialIntensity = shakeIntensity;
+        float initialDuration = shakeDuration;
+        
+        noise.m_AmplitudeGain = shakeIntensity;
+        noise.m_FrequencyGain = 10f;
+        
+        float decreaseFactor = 1.0f / shakeDuration;
+        
+        InvokeRepeating("DecreaseShake", 0, 0.01f);
+    }
+
+    
+    void DecreaseShake()
+    {
+        CinemachineBasicMultiChannelPerlin noise = playCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+        
+        shakeIntensity -= Time.deltaTime;
+        noise.m_AmplitudeGain = shakeIntensity;
+        
+        if (shakeIntensity <= 0)
+        {
+            CancelInvoke("DecreaseShake");
+            noise.m_AmplitudeGain = 0;
+        }
+    }
+
+    private void PerfectShake()
+    {
+        ShakeCamera(1f, 1.5f);
     }
 }

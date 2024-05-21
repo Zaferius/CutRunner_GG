@@ -9,6 +9,8 @@ public class Player : MonoBehaviour
     private Rigidbody rb;
     private bool _canGo;
     public float testSpeed;
+
+    public Transform platformTarget;
     
     private void OnEnable()
     {
@@ -32,7 +34,13 @@ public class Player : MonoBehaviour
     {
         if (_canGo && GameManager.i.gameState == GameManager.GameState.Play)
         {
+            if (platformTarget)
+            {
+                transform.LookAt(platformTarget);
+            }
+            
             transform.Translate(transform.forward * (Time.deltaTime * testSpeed));
+            
         }
     }
 
