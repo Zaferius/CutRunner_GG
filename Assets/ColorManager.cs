@@ -6,7 +6,7 @@ public class ColorManager : MonoBehaviour
 {
     public static ColorManager i;
     
-    public Color startingColor = Color.red;
+    private  Color startingColor = Color.red;
     public float colorStep = 0.1f;
 
     private Color currentColor;

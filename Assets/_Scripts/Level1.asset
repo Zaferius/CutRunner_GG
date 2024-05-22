@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c33e6dc60a99bd4f87ca8209e009c2d, type: 3}
   m_Name: Level1
   m_EditorClassIdentifier: 
-  platformAmount: 20
+  platformAmount: 15
   startingPlatformPrefab: {fileID: 5801653023602548761, guid: 60fac5c5e15568943a86d615695e9456,
     type: 3}
   platformPrefab: {fileID: 8837096321041449070, guid: ace88e11471c7d74aa32d8932def778f,

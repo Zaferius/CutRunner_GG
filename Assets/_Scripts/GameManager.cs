@@ -24,10 +24,10 @@ public class GameManager : MonoBehaviour
     public List<MovingPlatform> placedPlatforms = new List<MovingPlatform>();
     public MovingPlatform activePlatform;
     private Transform _previousPlatform;
-    private int placedPlatformIndex;
+    [SerializeField] private int placedPlatformIndex;
 
     [Space(5)] 
-    public LayerMask platformLayer;
+    public LayerMask placedPlatformLayer;
     [Space(5)] 
     private float _currentZPos;
     public GameObject playPlatform;
@@ -74,6 +74,9 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (gameState != GameState.Play) return;
+        PlayerPosChecker();
+        
+        if (placedPlatformIndex >= Level.i.lvlScriptable.platformAmount) return;
 
         if (placedPlatformIndex == -1 && player.transform.localPosition.z > 0.1f)
         {
@@ -84,8 +87,6 @@ public class GameManager : MonoBehaviour
         {
            StopPlatform();
         }
-
-        PlayerPosChecker();
     }
 
     private void StopPlatform()
@@ -93,18 +94,30 @@ public class GameManager : MonoBehaviour
         CalculatePlacePos();
 
         activePlatform.StopPlatform();
+        activePlatform = null;
 
         SpawnPlatform();
+      
     }
 
     private void SpawnPlatform()
     {
-        placedPlatformIndex++;
-        _currentZPos += 2;
-        var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZPos), Quaternion.identity);
-        var platformSc = platformObj.GetComponent<MovingPlatform>();
-        placedPlatforms.Add(platformSc);
-        platformSc.StartPlatform();
+        if (placedPlatformIndex < Level.i.lvlScriptable.platformAmount - 1)
+        {
+            placedPlatformIndex++;
+            _currentZPos += 2;
+            var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZPos), Quaternion.identity);
+            var platformSc = platformObj.GetComponent<MovingPlatform>();
+            placedPlatforms.Add(platformSc);
+            platformSc.StartPlatform();
+
+            if (placedPlatforms.Count == Level.i.lvlScriptable.platformAmount - 2)
+            {
+                var finishPlatform = Instantiate(Level.i.lvlScriptable.finishPlatformPrefab, new Vector3(0, -15, _currentZPos + 10), Quaternion.identity);
+                finishPlatform.transform.DOLocalMoveY(0, 1.75f).SetEase(Ease.OutQuad);
+            }
+        }
+       
     }
 
     private void CalculatePlacePos()
@@ -264,12 +277,12 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    private void PlayerPosChecker()
+    /*private void PlayerPosChecker()
     {
         var originPos = new Vector3(player.transform.position.x
             , player.transform.position.y + 2
             , player.transform.position.z) + player.transform.forward * 1.5f;
-        if (Physics.Raycast(originPos, Vector3.down, out var hit, Mathf.Infinity, platformLayer))
+        if (Physics.Raycast(originPos, Vector3.down, out var hit, Mathf.Infinity, placedPlatformLayer))
         {
             var closestPlatform = hit.collider.gameObject;
             var platformCenter = closestPlatform.transform.position;
@@ -279,6 +292,47 @@ public class GameManager : MonoBehaviour
             newPosition.x = averagePoint.x;
 
             player.transform.position = newPosition;
+        }
+    }*/
+    
+    private void PlayerPosChecker()
+    {
+        // Ray'lerin sayısını belirleyen değişken
+        int rayCount = 10;
+        // Ray'ler arasındaki mesafeyi belirleyen değişken
+        float raySpacing = 0.2f;
+
+        // Player'ın pozisyonunu al
+        Vector3 playerPos = player.transform.position;
+        // Player'ın yukarısından başlayacak origin pozisyonunu hesapla
+        Vector3 originPos = new Vector3(playerPos.x - ((rayCount - 1) * raySpacing * 0.5f), playerPos.y + 2, playerPos.z);
+
+        for (int i = 0; i < rayCount; i++)
+        {
+            // Ray'in başlangıç pozisyonunu belirle
+            Vector3 rayOrigin = originPos + player.transform.right * (raySpacing * i) + player.transform.forward * 1.5f;
+
+            Debug.DrawRay(rayOrigin, Vector3.down * 30, Color.red);
+            
+            // Ray'i oluştur ve platformu kontrol et
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 30, placedPlatformLayer))
+            {
+                // En yakın platformu bul
+                GameObject closestPlatform = hit.collider.gameObject;
+                // Platformun merkezini al
+                Vector3 platformCenter = closestPlatform.transform.position;
+                // Ortalama noktayı hesapla
+                Vector3 averagePoint = Vector3.Lerp(playerPos, platformCenter, 0.3f);
+                // Yeni pozisyonu güncelle
+                Vector3 newPosition = playerPos;
+                newPosition.x = averagePoint.x;
+
+                // Player'ın pozisyonunu güncelle
+                player.transform.position = newPosition;
+
+                // Bir platform bulduğumuzda döngüyü sonlandır
+                break;
+            }
         }
     }
 

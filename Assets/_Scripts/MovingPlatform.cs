@@ -70,12 +70,13 @@ public class MovingPlatform : MonoBehaviour
         isMoving = true;
         transform.DOScale(0, 0);
         transform.DOScale(_defaultScale, 0.35f).SetEase(Ease.OutBack);
+        GetComponent<MeshRenderer>().material.DOColor(ColorManager.i.NextColor(), 0.2f);
         GameManager.i.activePlatform = this;
     }
 
     public void StopPlatform()
     {
         isMoving = false;
-        GetComponent<MeshRenderer>().material.DOColor(ColorManager.i.NextColor(), 0.2f);
+        gameObject.layer = 9;
     }
 }

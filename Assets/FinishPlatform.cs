@@ -26,12 +26,12 @@ public class FinishPlatform : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.i.gameState != GameManager.GameState.Win)
+        if (GameManager.i.gameState == GameManager.GameState.Play)
         {
+            winPos.transform.position = new Vector3(player.transform.position.x, winPos.transform.position.y, winPos.transform.position.z);
             _distanceToWin = Vector3.Distance(winPos.position, player.position);
             if (_distanceToWin < 0.2f)
             {
-                Actions.OnGameWin();
                 PlayerToThrone();
             }
         }
@@ -41,9 +41,10 @@ public class FinishPlatform : MonoBehaviour
     private void PlayerToThrone()
     {
         GameManager.i.gameState = GameManager.GameState.Win;
-        player.transform.DOLocalMove(throneContainer.transform.position, 0.2f)
+        player.transform.DOLocalMove(throneContainer.transform.position, 1f)
             .OnComplete(() =>
             {
+                Actions.OnGameWin();
                 player.transform.DOLocalMoveY(4, 1).SetEase(Ease.OutQuad);
                 throneHolder.DOScaleY(2, 1).SetEase(Ease.OutQuad);
             });

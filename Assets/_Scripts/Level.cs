@@ -1,20 +1,36 @@
 using DG.Tweening;
+using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Level : MonoBehaviour
 {
-    [SerializeField] private LevelScriptable lvlScriptable;
+    public static Level i;
     
+    public LevelScriptable lvlScriptable;
+    [SerializeField] private Transform fogPlane;
+    [SerializeField] private GameObject levelPropCube;
+
     private void OnEnable()
     {
-        Actions.OnFinishPlatform += BuildFinishPlatform;
-        
+        Actions.OnGameWin += GameWin;
     }
 
     private void OnDisable()
     {
-        Actions.OnFinishPlatform -= BuildFinishPlatform;
-       
+        Actions.OnGameWin -= GameWin;
+    }
+    
+    private void Awake()
+    {
+        if (i)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            i = this;
+        }
     }
 
     private void Start()
@@ -25,23 +41,24 @@ public class Level : MonoBehaviour
 
     private void BuildLevel()
     {
-        var startPosition = new Vector3(0,0,6f);
-
         var startingPlatform = Instantiate(lvlScriptable.startingPlatformPrefab, Vector3.zero, Quaternion.identity);
         startingPlatform.transform.parent = transform;
+
+        var environmentObj = transform.GetChild(0);
+        
+        for (var j = 0; j < lvlScriptable.platformAmount * 4; j++)
+        {
+            var cube = Instantiate(levelPropCube, new Vector3(Random.Range(-7,7),Random.Range(-7f,-9f), 3 * j), Quaternion.identity);
+            cube.transform.parent = environmentObj;
+        }
         
     }
 
-    private void BuildFinishPlatform()
+    private void GameWin()
     {
-        /*var finishPlatform = Instantiate(lvlScriptable.finishPlatformPrefab
-            , new Vector3(0,0,GameManager.i.movingPlatforms[^1].transform.localPosition.z + 6)
-            , Quaternion.identity);
-        
-        finishPlatform.transform.parent = transform;
-        var finishPlatformDefaultScale = finishPlatform.transform.localScale;
-        finishPlatform.transform.localScale = Vector3.zero;
-        finishPlatform.transform.DOScale(finishPlatformDefaultScale, 0.3f).SetEase(Ease.OutBack);*/
+        fogPlane.transform.DOLocalMoveY(3.5f, 2f).SetEase(Ease.OutQuad);
     }
+    
+    
 }
 

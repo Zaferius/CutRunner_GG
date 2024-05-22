@@ -6,7 +6,8 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public CinemachineVirtualCamera playCam;
+    [SerializeField] private  CinemachineVirtualCamera playCam;
+    [SerializeField] private CinemachineBrain camBrain;
     [Space(5)]
     public CinemachineFreeLook winCam;
     public float winCamRotationSpeed;
@@ -49,6 +50,7 @@ public class CameraController : MonoBehaviour
     {
         playCam.Priority = 0;
         winCam.Priority = 99;
+        camBrain.m_UpdateMethod = CinemachineBrain.UpdateMethod.LateUpdate;
     }
 
     private void RotateWinCam()

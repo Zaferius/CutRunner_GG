@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,32 +6,34 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [Header("GameWin")] 
-    public GameObject gameWinHolder;
+    [SerializeField] private GameObject gameWinHolder;
     
     [Header("GameLose")] 
-    public GameObject gameLoseHolder;
+    [SerializeField] private GameObject gameLoseHolder;
     
     [Space(5)]
-    public Button startButton;
-    public Button retryButton;
+    [SerializeField] private Button startButton;
+    [SerializeField] private Button retryButton;
+    [SerializeField] private Button nextButton;
     
     private void OnEnable()
     {
         Actions.OnStartGame += StartGame;
         Actions.OnGameLose += GameLose;
+        Actions.OnGameWin += GameWin;
     }
 
     private void OnDisable()
     {
         Actions.OnStartGame -= StartGame;
         Actions.OnGameLose -= GameLose;
+        Actions.OnGameWin -= GameWin;
     }
-
-    
-    void Start()
+    private void Start()
     {
         startButton.onClick.AddListener(GameManager.i.StartGame);
         retryButton.onClick.AddListener(SceneReload);
+        nextButton.onClick.AddListener(SceneReload);
     }
 
     private void StartGame()
@@ -45,6 +46,14 @@ public class UIManager : MonoBehaviour
     private void GameLose()
     {
         gameLoseHolder.SetActive(true);
+    }
+    
+    private void GameWin()
+    {
+        TimeManager.i.transform.DOMoveX(0, 2f).OnComplete(() =>
+        {
+            gameWinHolder.SetActive(true);
+        });
     }
 
     private void SceneReload()
