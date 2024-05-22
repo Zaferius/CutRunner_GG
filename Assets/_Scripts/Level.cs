@@ -60,7 +60,5 @@ public class Level : MonoBehaviour
     {
         fogPlane.transform.DOLocalMoveY(3.5f, 2f).SetEase(Ease.OutQuad);
     }
-    
-    
 }
 

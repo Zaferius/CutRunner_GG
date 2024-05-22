@@ -9,18 +9,17 @@ public class MovingPlatform : MonoBehaviour
 {
     [SerializeField] private bool isMoving;
    private Vector3 _defaultScale;
-   
-   
-  
+   private MeshRenderer _meshRenderer;
+
    public int moveDirection = 1;
    public float totalMoveTime = 5.0f;
    public float movingSpeed = 1.0f;
    public float elapsedTime = 0.0f;
-   
 
    private void Awake()
    {
        _defaultScale = transform.localScale;
+       _meshRenderer = GetComponent<MeshRenderer>();
    }
 
    private void Start()
@@ -83,14 +82,12 @@ public class MovingPlatform : MonoBehaviour
         isMoving = true;
         transform.DOScale(0, 0);
         transform.DOScale(_defaultScale, 0.35f).SetEase(Ease.OutBack);
-        GetComponent<MeshRenderer>().material.DOColor(ColorManager.i.NextColor(), 0.2f);
+        _meshRenderer.material.DOColor(ColorManager.i.NextColor(), 0.2f);
         GameManager.i.activePlatform = this;
-        
     }
 
     public void StopPlatform()
     {
         isMoving = false;
-        /*gameObject.layer = 9;*/
     }
 }

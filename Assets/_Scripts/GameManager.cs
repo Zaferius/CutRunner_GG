@@ -92,12 +92,9 @@ public class GameManager : MonoBehaviour
     private void StopPlatform()
     {
         CalculatePlacePos();
-
         activePlatform.StopPlatform();
         activePlatform = null;
-
         SpawnPlatform();
-      
     }
 
     private void SpawnPlatform()
@@ -194,7 +191,6 @@ public class GameManager : MonoBehaviour
 
        Vector3 newPosition;
 
-   
        if (xOffset > 0)
        {
            newPosition = initialPosition + new Vector3(-halfInitialWidth + halfNewWidth, 0, 0);
@@ -293,7 +289,7 @@ public class GameManager : MonoBehaviour
         {
             Vector3 rayOrigin = originPos + player.transform.right * (raySpacing * z) + player.transform.forward * 1.5f;
 
-            Debug.DrawRay(rayOrigin, Vector3.down * 30, Color.red);
+            /*Debug.DrawRay(rayOrigin, Vector3.down * 30, Color.red);*/
             
             if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 30, placedPlatformLayer))
             {
