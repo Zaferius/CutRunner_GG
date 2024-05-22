@@ -85,10 +85,7 @@ public class GameManager : MonoBehaviour
            StopPlatform();
         }
 
-        if (placedPlatformIndex > 1)
-        {
-            PlayerPosChecker();
-        }
+        PlayerPosChecker();
     }
 
     private void StopPlatform()
