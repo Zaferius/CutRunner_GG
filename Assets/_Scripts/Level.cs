@@ -31,6 +31,8 @@ public class Level : MonoBehaviour
         {
             i = this;
         }
+
+        lvlScriptable.platformAmount = Random.Range(15, 25);
     }
 
     private void Start()
@@ -46,7 +48,7 @@ public class Level : MonoBehaviour
 
         var environmentObj = transform.GetChild(0);
         
-        for (var j = 0; j < lvlScriptable.platformAmount * 4; j++)
+        for (var j = 0; j < lvlScriptable.platformAmount * 5; j++)
         {
             var cube = Instantiate(levelPropCube, new Vector3(Random.Range(-7,7),Random.Range(-7f,-9f), 3 * j), Quaternion.identity);
             cube.transform.parent = environmentObj;

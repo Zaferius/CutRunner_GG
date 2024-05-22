@@ -39,6 +39,24 @@ public class SoundManager : MonoBehaviour
             Debug.LogWarning("Clip 404");
         }
     }
+    
+    public void PlaySoundRandomPitch(AudioClip clip,float minPitch, float maxPitch,float volume = 0.5f)
+    {
+        if (clip != null)
+        {
+            GameObject soundObject = new GameObject("Sound");
+            AudioSource audioSource = soundObject.AddComponent<AudioSource>();
+            audioSource.pitch = Random.Range(minPitch, maxPitch);
+            audioSource.clip = clip;
+            audioSource.volume = volume;
+            audioSource.Play();
+            Destroy(soundObject, clip.length);
+        }
+        else
+        {
+            Debug.LogWarning("Clip 404");
+        }
+    }
 
     public void PlaySoundPerfectTap(AudioClip clip, float volume = 0.75f)
     {
