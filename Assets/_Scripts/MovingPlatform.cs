@@ -33,7 +33,7 @@ public class MovingPlatform : MonoBehaviour
    
     void Update()
     {
-        if (isMoving)
+        if (isMoving && GameManager.i.gameState == GameManager.GameState.Play)
         {
             if (type == PlatformType.RightMover)
             {
@@ -60,6 +60,8 @@ public class MovingPlatform : MonoBehaviour
         {
             transform.localPosition = new Vector3(transform.localPosition.x + 4, transform.localPosition.y, transform.localPosition.z);
         }
+        
+        Instantiate(ParticleManager.i.whiteStarExplosion, transform.position, Quaternion.identity);
         
     }
 

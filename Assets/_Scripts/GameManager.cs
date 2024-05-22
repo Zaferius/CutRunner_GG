@@ -108,7 +108,6 @@ public class GameManager : MonoBehaviour
         var platformSc = platformObj.GetComponent<MovingPlatform>();
         placedPlatforms.Add(platformSc);
         platformSc.StartPlatform();
-      
     }
 
     private void CalculatePlacePos()
@@ -170,7 +169,7 @@ public class GameManager : MonoBehaviour
     
        if (newWidth <= 0)
        {
-           Destroy(platform);
+           MissPlacePlatform(platform.GetComponent<MovingPlatform>());
            return;
        }
     
@@ -236,7 +235,36 @@ public class GameManager : MonoBehaviour
     
        cutPartRb.AddForce(platform.transform.right * (dir * 200), ForceMode.Force);
     
-       Destroy(cutPart, 3f);
+       TimeManager.i.transform.DOMoveX(0, 2f).OnComplete(() =>
+       {
+           cutPart.transform.DOScale(0,0.2f).SetEase(Ease.InBack).OnComplete(() =>
+           {
+               Destroy(cutPart);
+           });
+       });
+      
+    }
+
+    private void MissPlacePlatform(MovingPlatform platform)
+    {
+        placedPlatforms.Remove(platform);
+        placedPlatformIndex--;
+        _currentZPos -= 2;
+        platform.gameObject.AddComponent<Rigidbody>();
+        var platformRb = platform.gameObject.GetComponent<Rigidbody>();
+        platformRb.AddTorque(new Vector3(Random.Range(-50,50),Random.Range(-75,75),Random.Range(-5,5)));
+        platform.GetComponent<MeshRenderer>().material.DOColor(Color.white,0).OnComplete(() =>
+        {
+            platform.GetComponent<MeshRenderer>().material.DOColor(Color.gray, 0.6f);
+        });
+        
+        TimeManager.i.transform.DOMoveX(0, 2f).OnComplete(() =>
+        {
+            platform.transform.DOScale(0,0.2f).SetEase(Ease.InBack).OnComplete(() =>
+            {
+                Destroy(platform.gameObject);
+            });
+        });
     }
 
     private void PlayerPosChecker()

@@ -7,6 +7,7 @@ public class ParticleManager : MonoBehaviour
     public static ParticleManager i;
     
     public ParticleSystem starExplosion;
+    public ParticleSystem whiteStarExplosion;
     
     private void Awake()
     {
