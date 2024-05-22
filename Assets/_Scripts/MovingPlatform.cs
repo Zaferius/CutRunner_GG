@@ -60,14 +60,14 @@ public class MovingPlatform : MonoBehaviour
         {
             transform.localPosition = new Vector3(transform.localPosition.x + 4, transform.localPosition.y, transform.localPosition.z);
         }
-
-        transform.DOScale(0, 0);
+        
     }
 
     public void StartPlatform()
     {
         isMoving = true;
-        transform.DOScale(_defaultScale, 0.15f).SetEase(Ease.OutBack);
+        transform.DOScale(0, 0);
+        transform.DOScale(_defaultScale, 0.35f).SetEase(Ease.OutBack);
         GameManager.i.activePlatform = this;
     }
 

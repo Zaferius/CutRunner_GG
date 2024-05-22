@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour
     private int placedPlatformIndex;
 
     [Space(5)] 
+    public LayerMask platformLayer;
+    [Space(5)] 
     private float _currentZPos;
     public GameObject playPlatform;
     [Space(5)] 
@@ -53,6 +55,16 @@ public class GameManager : MonoBehaviour
         placedPlatformIndex = -1;
         _currentZPos = 4;
     }
+    
+    private void OnEnable()
+    {
+        Actions.OnGameLose += GameLose;
+    }
+
+    private void OnDisable()
+    {
+        Actions.OnGameLose -= GameLose;
+    }
 
     public void StartGame()
     {
@@ -71,6 +83,11 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && activePlatform)
         {
            StopPlatform();
+        }
+
+        if (placedPlatformIndex > 1)
+        {
+            PlayerPosChecker();
         }
     }
 
@@ -117,6 +134,10 @@ public class GameManager : MonoBehaviour
         {
             Actions.OnPerfectTap();
             perfectTapCombo++;
+            if (perfectTapCombo > 10)
+            {
+                perfectTapCombo = 10;
+            }
 
             Instantiate(ParticleManager.i.starExplosion, activePlatform.transform.position, Quaternion.identity);
             SoundManager.instance.PlaySoundPerfectTap(SoundManager.instance.perfectTap);
@@ -135,85 +156,112 @@ public class GameManager : MonoBehaviour
         else
         {
             perfectTapCombo = 0;
-            float xOffset = activePlatform.transform.localPosition.x - _previousPlatform.transform.localPosition.x;
+            SoundManager.instance.PlaySound(SoundManager.instance.sad, 1);
+            var xOffset = activePlatform.transform.localPosition.x - _previousPlatform.transform.localPosition.x;
             CutAndDestroy(activePlatform.gameObject, xOffset);
         }
     }
-    
- void CutAndDestroy(GameObject platform, float xOffset)
-{
-    float platformWidth = platform.transform.localScale.x;
-    float newWidth = platformWidth - Mathf.Abs(xOffset);
-    
-    if (newWidth <= 0)
+
+    private void CutAndDestroy(GameObject platform, float xOffset)
     {
-        Destroy(platform);
-        return;
-    }
+        
+       var platformWidth = platform.transform.localScale.x;
+       var newWidth = platformWidth - Mathf.Abs(xOffset);
     
-    Vector3 initialScale = platform.transform.localScale;
-    Vector3 initialPosition = platform.transform.position;
+       if (newWidth <= 0)
+       {
+           Destroy(platform);
+           return;
+       }
+    
+       Vector3 initialScale = platform.transform.localScale;
+       Vector3 initialPosition = platform.transform.position;
 
-    Vector3 newScale = new Vector3(newWidth, initialScale.y, initialScale.z);
-    float halfInitialWidth = initialScale.x / 2f;
-    float halfNewWidth = newScale.x / 2f;
+       Vector3 newScale = new Vector3(newWidth, initialScale.y, initialScale.z);
+       float halfInitialWidth = initialScale.x / 2f;
+       float halfNewWidth = newScale.x / 2f;
 
-    Vector3 newPosition;
+       Vector3 newPosition;
 
    
-    if (xOffset > 0)
-    {
-        newPosition = initialPosition + new Vector3(-halfInitialWidth + halfNewWidth, 0, 0);
-    }
-    else
-    {
-        newPosition = initialPosition + new Vector3(halfInitialWidth - halfNewWidth, 0, 0);
-    }
+       if (xOffset > 0)
+       {
+           newPosition = initialPosition + new Vector3(-halfInitialWidth + halfNewWidth, 0, 0);
+       }
+       else
+       {
+           newPosition = initialPosition + new Vector3(halfInitialWidth - halfNewWidth, 0, 0);
+       }
     
-    platform.transform.localScale = newScale;
-    platform.transform.position = newPosition;
-    playPlatform = platform;
+       platform.transform.localScale = newScale;
+       platform.transform.position = newPosition;
+       playPlatform = platform;
     
-    float cutWidth = Mathf.Abs(xOffset);
-    Vector3 cutScale = new Vector3(cutWidth, initialScale.y, initialScale.z);
-    Vector3 cutPosition;
+       float cutWidth = Mathf.Abs(xOffset);
+       Vector3 cutScale = new Vector3(cutWidth, initialScale.y, initialScale.z);
+       Vector3 cutPosition;
     
-    if (xOffset > 0)
-    {
-        cutPosition = initialPosition + new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
-    }
-    else
-    {
-        cutPosition = initialPosition - new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
-    }
+       if (xOffset > 0)
+       {
+           cutPosition = initialPosition + new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
+       }
+       else
+       {
+           cutPosition = initialPosition - new Vector3(halfInitialWidth - newWidth / 2f + cutWidth / 2f, 0, 0);
+       }
     
-    GameObject cutPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
+       GameObject cutPart = GameObject.CreatePrimitive(PrimitiveType.Cube);
     
-    cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.white,0).OnComplete(() =>
-    {
-        cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.gray, 0.6f);
-    });
+       cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.white,0).OnComplete(() =>
+       {
+           cutPart.GetComponent<MeshRenderer>().material.DOColor(Color.gray, 0.6f);
+       });
     
-    cutPart.layer = 7;
-    cutPart.transform.localScale = cutScale;
-    cutPart.transform.position = cutPosition;
-    cutPart.AddComponent<Rigidbody>();
-    var cutPartRb = cutPart.GetComponent<Rigidbody>();
-    cutPartRb.AddTorque(new Vector3(Random.Range(-50,50),Random.Range(-75,75),Random.Range(-5,5)));
+       cutPart.layer = 7;
+       cutPart.transform.localScale = cutScale;
+       cutPart.transform.position = cutPosition;
+       cutPart.AddComponent<Rigidbody>();
+       var cutPartRb = cutPart.GetComponent<Rigidbody>();
+       cutPartRb.AddTorque(new Vector3(Random.Range(-50,50),Random.Range(-75,75),Random.Range(-5,5)));
 
-    var dir = 1;
-    if (xOffset > 0)
-    {
-        dir = 1;
-    }
-    else
-    {
-        dir = -1;
-    }
+       var dir = 1;
+       if (xOffset > 0)
+       {
+           dir = 1;
+       }
+       else
+       {
+           dir = -1;
+       }
     
-    cutPartRb.AddForce(platform.transform.right * (dir * 100), ForceMode.Force);
+       cutPartRb.AddForce(platform.transform.right * (dir * 200), ForceMode.Force);
     
-    Destroy(cutPart, 3f);
-}
+       Destroy(cutPart, 3f);
+    }
+
+    private void PlayerPosChecker()
+    {
+        var originPos = new Vector3(player.transform.position.x
+            , player.transform.position.y + 2
+            , player.transform.position.z) + player.transform.forward * 1.5f;
+        if (Physics.Raycast(originPos, Vector3.down, out var hit, Mathf.Infinity, platformLayer))
+        {
+            var closestPlatform = hit.collider.gameObject;
+            var platformCenter = closestPlatform.transform.position;
+            var playerPosition = player.transform.position;
+            var averagePoint = Vector3.Lerp(playerPosition, platformCenter, 0.3f);
+            var newPosition = player.transform.position;
+            newPosition.x = averagePoint.x;
+
+            player.transform.position = newPosition;
+        }
+    }
+
+    private void GameLose()
+    {
+        Instantiate(ParticleManager.i.starExplosion, player.transform.position, Quaternion.identity);
+        Destroy(player.gameObject);
+        gameState = GameState.Lose;
+    }
     
 }

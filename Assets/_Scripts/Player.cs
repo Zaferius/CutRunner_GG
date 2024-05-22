@@ -8,9 +8,7 @@ public class Player : MonoBehaviour
     private Animator animator;
     private Rigidbody rb;
     private bool _canGo;
-    public float testSpeed;
-
-    public Transform platformTarget;
+    public float speed;
     
     private void OnEnable()
     {
@@ -32,15 +30,14 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+       
+    }
+
+    private void FixedUpdate()
+    {
         if (_canGo && GameManager.i.gameState == GameManager.GameState.Play)
         {
-            if (platformTarget)
-            {
-                transform.LookAt(platformTarget);
-            }
-            
-            transform.Translate(transform.forward * (Time.deltaTime * testSpeed));
-            
+            transform.Translate(transform.forward * (Time.deltaTime * speed));
         }
     }
 
@@ -56,4 +53,5 @@ public class Player : MonoBehaviour
         animator.SetTrigger("dance");
         _canGo = false;
     }
+    
 }

@@ -7,6 +7,7 @@ public class SoundManager : MonoBehaviour
     public static SoundManager instance;
 
     public AudioClip perfectTap;
+    public AudioClip sad;
     
 
     void Awake()
@@ -39,14 +40,15 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void PlaySoundPerfectTap(AudioClip clip, float volume = 0.5f)
+    public void PlaySoundPerfectTap(AudioClip clip, float volume = 0.75f)
     {
         if (clip != null)
         {
             GameObject soundObject = new GameObject("Sound");
             AudioSource audioSource = soundObject.AddComponent<AudioSource>();
             audioSource.volume = volume;
-            audioSource.pitch += GameManager.i.perfectTapCombo / 2f;
+            audioSource.pitch = 1;
+            audioSource.pitch += GameManager.i.perfectTapCombo / 10f;
             audioSource.clip = perfectTap;
             audioSource.Play();
             Destroy(soundObject, clip.length);
