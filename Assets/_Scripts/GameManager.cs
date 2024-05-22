@@ -107,6 +107,7 @@ public class GameManager : MonoBehaviour
             placedPlatformIndex++;
             _currentZPos += 2;
             var platformObj = Instantiate(playPlatform, new Vector3(0, 0, _currentZPos), Quaternion.identity);
+            /*platformObj.layer = 8;*/
             var platformSc = platformObj.GetComponent<MovingPlatform>();
             placedPlatforms.Add(platformSc);
             platformSc.StartPlatform();
@@ -204,6 +205,7 @@ public class GameManager : MonoBehaviour
     
        platform.transform.localScale = newScale;
        platform.transform.position = newPosition;
+       platform.gameObject.layer = 9;
        playPlatform = platform;
     
        float cutWidth = Mathf.Abs(xOffset);
@@ -258,6 +260,7 @@ public class GameManager : MonoBehaviour
     private void MissPlacePlatform(MovingPlatform platform)
     {
         placedPlatforms.Remove(platform);
+        platform.gameObject.layer = 7;
         placedPlatformIndex--;
         _currentZPos -= 2;
         platform.gameObject.AddComponent<Rigidbody>();

@@ -26,14 +26,16 @@ public class CameraController : MonoBehaviour
 
     private void OnEnable()
     {
-        Actions.OnGameWin += WinCam;
+        Actions.OnGameWin += DanceCam;
         Actions.OnPerfectTap += PerfectShake;
+        Actions.OnWinPos += WinPosCam;
     }
 
     private void OnDisable()
     {
-        Actions.OnGameWin -= WinCam;
+        Actions.OnGameWin -= DanceCam;
         Actions.OnPerfectTap -= PerfectShake;
+        Actions.OnWinPos -= WinPosCam;
     }
 
     private void Update()
@@ -42,14 +44,17 @@ public class CameraController : MonoBehaviour
         {
             RotateWinCam();
         }
-        
-        
     }
 
-    private void WinCam()
+    private void DanceCam()
     {
         playCam.Priority = 0;
         winCam.Priority = 99;
+        camBrain.m_UpdateMethod = CinemachineBrain.UpdateMethod.LateUpdate;
+    }
+
+    private void WinPosCam()
+    {
         camBrain.m_UpdateMethod = CinemachineBrain.UpdateMethod.LateUpdate;
     }
 
